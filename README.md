@@ -13,6 +13,7 @@ Dependencies:
 
 ### Project Structure
 
+```
 .
 ├── go.mod
 ├── go.sum
@@ -36,3 +37,4 @@ Dependencies:
 └── index.html
 
 8 directories, 13 files
+```
