@@ -22,6 +22,9 @@ case "$1" in
   help)
     help
     ;;
+  tree)
+    tree --gitignore
+    ;;
   start)
     go mod tidy
     go mod vendor
