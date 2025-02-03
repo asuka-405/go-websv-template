@@ -1,15 +1,32 @@
 #!/bin/zsh
 
-# Define the help function before it's called
+PATH=$PATH:$HOME/go/bin
+
+# Define reusable help function
 function help() {
-  echo "Usage: $0 <command>"
-  echo "Commands:"
-  echo "  start - build and start the test server"
-  echo "  clean - remove the test server binary"
-  echo "  tidy - run go mod tidy and vendor"
-  echo "  install <package> - install a package and run go mod tidy and vendor"
-  echo "  help - show this help message"
+  cat <<EOF
+Usage: $0 <command> [arguments]
+
+Commands:
+  dev            Build and start the test server with hot-reload using reflex
+  clean          Remove the test server binary
+  tidy           Run 'go mod tidy' and 'go mod vendor'
+  install <pkg>  Install a package and run 'go mod tidy' and 'go mod vendor'
+  tree           Display the directory tree ignoring files from .gitignore
+  help           Show this help message
+EOF
   exit 0
+}
+
+# Define reusable function for installing a package
+function install_package() {
+  if [ -z "$1" ]; then
+    echo "Usage: $0 install <package>"
+    exit 1
+  fi
+  go get "$1"
+  go mod tidy
+  go mod vendor
 }
 
 # If no command is specified, show help
@@ -17,44 +34,50 @@ if [ -z "$1" ]; then
   help
 fi
 
+BINARY_NAME="erp-server"
+BINARY_PATH="./bin/$BINARY_NAME"
+
 # Handle commands
-case "$1" in 
+case "$1" in
   help)
     help
     ;;
   tree)
-    tree --gitignore
+    tree --gitignore -I "vendor"
+    ;;
+  build)
+    echo "Building binary..."
+    go build -o "$BINARY_PATH" .
+    echo "Binary built: $BINARY_PATH"
     ;;
   start)
-    go mod tidy
-    go mod vendor
-    go build -o go-webapp src/main.go
-    ./go-webapp
+    echo "Starting server..."
+    "$BINARY_PATH"
+    ;;
+  dev)
+    echo "Starting dev server with hot-reload..."
+    air
     ;;
   clean)
-    rm -f test-server
+    rm -f "$BINARY_PATH"
+    echo "Binary removed: $BINARY_PATH"
     ;;
   tidy)
     go mod tidy
     go mod vendor
     ;;
-  install)
-    if [ -z "$2" ]; then
-      echo "Usage: $0 install <package>"
-      exit 1
-    fi
-    go get $2
-    go mod tidy
-    go mod vendor
+  add)
+    install_package "$2"
     ;;
-  i)
+  install | i)
     if [ -z "$2" ]; then
       echo "Usage: $0 install <package>"
       exit 1
     fi
-    go get $2
-    go mod tidy
-    go mod vendor
+    go install "$2"
+    echo "Installed package: $2 to $GOPATH/bin"
+    echo "  Ensure $GOPATH/bin is in your PATH"
+    echo "  By default GOPATH is ~/go"
     ;;
   *)
     echo "Unknown command: $1"

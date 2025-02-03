@@ -3,7 +3,7 @@ package apiV1
 import (
 	"net/http"
 
-	"github.com/asuka-405/go-webapp/src/lib/libresponse"
+	"root/src/lib/libresponse"
 )
 
 func h_readiness(w http.ResponseWriter, r *http.Request) {
