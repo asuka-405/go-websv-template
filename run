@@ -18,6 +18,10 @@ EOF
   exit 0
 }
 
+function setup_containers() {
+  docker-compose up -d
+}
+
 # Define reusable function for installing a package
 function install_package() {
   if [ -z "$1" ]; then
@@ -78,6 +82,9 @@ case "$1" in
     echo "Installed package: $2 to $GOPATH/bin"
     echo "  Ensure $GOPATH/bin is in your PATH"
     echo "  By default GOPATH is ~/go"
+    ;;
+  setup)
+    setup_containers
     ;;
   *)
     echo "Unknown command: $1"

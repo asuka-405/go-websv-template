@@ -1,0 +1,7 @@
+services:
+  db:
+    extends:
+      file: ./src/db/docker-compose.yml
+      service: postgres
+    env_file:
+      - .env
