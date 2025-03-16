@@ -1,7 +1,10 @@
 package main
 
 import (
-	"github.com/asuka-405/go-webapp/src/api"
+	"root/src/api"
+	"root/src/server"
+	"root/src/web"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
@@ -10,6 +13,7 @@ import (
 func main() {
 	godotenv.Load()
 	api_router := api.Initialize()
+	web_router := web.Initialize()
 
 	router := chi.NewRouter()
 	router.Use(cors.Handler(cors.Options{
@@ -24,6 +28,7 @@ func main() {
 	}))
 
 	router.Mount("/api", api_router)
+	router.Mount("/", web_router)
 
-	api.Serve(router)
+	server.Serve(router)
 }

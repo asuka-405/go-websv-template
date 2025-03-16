@@ -1,0 +1,103 @@
+#!/bin/zsh
+
+# Define reusable help function
+function help() {
+  cat <<EOF
+Usage: $0 <command> [arguments]
+
+Commands:
+  dev                     Build and start the test server with hot-reload using reflex
+  clean                   Remove the test server binary
+  tidy                    Run 'go mod tidy' and 'go mod vendor'
+  install <pkg>           Install a package and run 'go mod tidy' and 'go mod vendor'
+  migrate <up|down|redo|setup>  Run database migrations
+  tree                    Display the directory tree ignoring files from .gitignore
+  help                    Show this help message
+EOF
+    exit 0
+}
+
+function migration(){
+    if [ -z "$1" ]; then
+        echo "Usage: ./run migrate <up|down|redo|setup>"
+        exit 1
+        elif [[ "$1" == "setup" ]]; then
+        echo "Creating migration table..."
+        migrate create -ext sql -dir $DB_MIG -seq init
+        return
+    fi
+    migrate -path $DB_MIG -database "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=disable" "$1"
+}
+
+# Define reusable function for installing a package
+function install_package() {
+    if [ -z "$1" ]; then
+        echo "Usage: ./run install <package>"
+        exit 1
+    fi
+    go get "$1"
+    go mod tidy
+    go mod vendor
+}
+
+# If no command is specified, show help
+if [ -z "$1" ]; then
+    help
+fi
+
+BINARY_NAME="erp-server"
+BINARY_PATH="./bin/$BINARY_NAME"
+
+# Handle commands
+case "$1" in
+    help)
+        help
+    ;;
+    tree)
+        tree --gitignore -I "vendor"
+    ;;
+    build)
+        echo "Building binary..."
+        go build -o "$BINARY_PATH" .
+        echo "Binary built: $BINARY_PATH"
+    ;;
+    start)
+        echo "Starting server..."
+        "$BINARY_PATH"
+    ;;
+    dev)
+        echo "Starting dev server with hot-reload..."
+        air
+    ;;
+    clean)
+        rm -f "$BINARY_PATH"
+        echo "Binary removed: $BINARY_PATH"
+    ;;
+    tidy)
+        go mod tidy
+        go mod vendor
+        printf "\e[4A\e[J" // Clear the last 4 lines, tidy and vendor gives error when they try to access pgdata
+    ;;
+    add)
+        install_package "$2"
+    ;;
+    install | i)
+        if [ -z "$2" ]; then
+            echo "Usage: $0 install <package>"
+            exit 1
+        fi
+        go install "$2"
+        echo "Installed package: $2 to $GOPATH/bin"
+        echo "  Ensure $GOPATH/bin is in your PATH"
+        echo "  By default GOPATH is ~/go"
+    ;;
+    migrate)
+        migration "$2"
+    ;;
+    *)
+        echo "Unknown command: $1"
+        exit 1
+    ;;
+esac
+
+exit 0

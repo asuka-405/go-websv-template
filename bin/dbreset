@@ -1,0 +1,15 @@
+#!/bin/bash
+
+name="${1:-db-dev}"
+base_container="${2:-postgres}"
+
+echo $name
+echo $base_container
+
+docker kill $name
+docker rm $name
+sudo rm -r data
+docker-compose up -d $base_container
+
+# docker exec -it db-dev /bin/bash
+# psql -U admin -d master -f

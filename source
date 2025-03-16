@@ -1,0 +1,14 @@
+PATH=$PATH:$HOME/go/bin
+
+env_file="$(pwd)/.env"
+if [[ -f "$env_file" ]]; then
+    echo "Loading environment variables from $env_file..."
+    set -a
+    source "$env_file"
+    set +a
+else
+    echo "No .env file found in $(pwd). Skipping..."
+fi
+
+cur_dir="$(pwd)"
+export PATH=$PATH:$cur_dir/bin

@@ -1,0 +1,2 @@
+#!/bin/bash
+pg_dump -U $DB_USER -d $DB_NAME -F c -f backup.sql
