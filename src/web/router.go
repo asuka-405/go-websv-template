@@ -7,6 +7,7 @@ import (
 
 	"root/src/lib/libresponse"
 	"root/src/lib/libtemplate"
+	"root/src/web/routes"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -35,6 +36,8 @@ func Initialize() chi.Router {
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		libresponse.WithHTML(w, http.StatusOK, rendered)
 	})
+
+	router.Mount("/", routes.Initialize(*ViewEngine))
 
 	return router
 }
