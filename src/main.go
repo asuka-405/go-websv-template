@@ -1,6 +1,7 @@
 package main
 
 import (
+	"root/src/lib/libblockchain/blockchainserver"
 	"root/src/server"
 
 	"github.com/joho/godotenv"
@@ -8,6 +9,6 @@ import (
 
 func main() {
 	godotenv.Load()
-	go server.BootTCPServer()
+	go blockchainserver.BlockchainServer()
 	server.BootHTTPServer()
 }

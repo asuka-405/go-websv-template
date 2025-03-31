@@ -22,11 +22,11 @@ func (s *tcpServer) OnBoot(engine gnet.Engine) (action gnet.Action) {
 func (s *tcpServer) OnAction(conn gnet.Conn) (action *gnet.Action) {
 	buf, _ := conn.Next(-1)
 	fmt.Printf("Received: %s\n", &buf)
-	conn.AsyncWrite([]byte("Hello from gnet tcp server\n"), nil)
+	conn.AsyncWrite([]byte("Hello from TCP server"+"\n"), nil)
 	return
 }
 
-func BootTCPServer() {
+func BootTCPServer(servername *string) {
 	server := new(tcpServer)
 	if err := gnet.Run(server, "tcp://:"+TCP_PORT, gnet.WithMulticore(true)); err != nil {
 		log.Fatal("TCP Server failed:", err)
