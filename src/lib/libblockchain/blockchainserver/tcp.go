@@ -50,9 +50,9 @@ func (s *blockChainServer) OnTraffic(conn gnet.Conn) gnet.Action {
 }
 
 func BlockchainServer() {
-	BLKCHAIN_PORT = os.Getenv("BLKCHAIN_PORT")
+	BLKCHAIN_PORT = os.Getenv("GWT_BLKCHAIN_PORT")
 	if BLKCHAIN_PORT == "" {
-		log.Fatal("BLKCHAIN_PORT is not set")
+		log.Fatal("GWT_BLKCHAIN_PORT is not set")
 	}
 
 	server := &blockChainServer{}

@@ -16,7 +16,7 @@ import (
 
 func initializeHTTPServer(router chi.Router) {
 
-	static_dir := os.Getenv("SV_STATIC")
+	static_dir := os.Getenv("GWT_SV_STATIC")
 	if static_dir == "" {
 		static_dir = "static"
 	}
@@ -26,7 +26,7 @@ func initializeHTTPServer(router chi.Router) {
 	filesDir := http.Dir(filepath.Join(workDir, "src", "public"))
 	libfs.FileServer(router, static_dir, filesDir)
 
-	webapp_port := os.Getenv("HTTP_PORT")
+	webapp_port := os.Getenv("GWT_HTTP_PORT")
 	if webapp_port == "" {
 		webapp_port = "8080"
 	}

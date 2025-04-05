@@ -8,7 +8,7 @@ import (
 	"github.com/panjf2000/gnet/v2"
 )
 
-var TCP_PORT = os.Getenv("TCP_PORT")
+var TCP_PORT = os.Getenv("GWT_TCP_PORT")
 
 type tcpServer struct {
 	gnet.BuiltinEventEngine

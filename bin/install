@@ -7,15 +7,8 @@ function install_air() {
     # air init
 }
 
-function install_podman_rootless_archlinux(){
-    sudo pacman -Sy podman podman-compose
-    sudo usermod --add-subuids 100000-165536 --add-subgids 100000-165536 $USER
-    systemctl --user enable podman.socket
-    echo "logout and login again to use podman"
-}
-
 function install_docker_archlinux() {
-    sudo pacman -Sy docker
+    sudo pacman -Sy docker docker-compose
     sudo systemctl enable docker
     sudo systemctl start docker
     sudo usermod -aG docker $USER
@@ -26,5 +19,8 @@ function install_docker_archlinux() {
 if [ $1 == "air" ]; then
     install_air
     elif [ $1 == "docker" ]; then
+    install_docker_archlinux
+else
+    install_air
     install_docker_archlinux
 fi
