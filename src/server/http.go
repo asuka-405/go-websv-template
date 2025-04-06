@@ -9,6 +9,8 @@ import (
 	"root/src/api"
 	libfs "root/src/lib/libfs"
 	"root/src/web"
+	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
@@ -31,17 +33,27 @@ func initializeHTTPServer(router chi.Router) {
 		webapp_port = "8080"
 	}
 
-	server := &http.Server{
-		Handler: router,
-		Addr:    ":" + webapp_port,
-	}
+	for {
+		port, _ := strconv.Atoi(webapp_port)
+		server := &http.Server{
+			Handler: router,
+			Addr:    fmt.Sprintf(":%d", port),
+		}
 
-	fmt.Printf("Server running @ port %v  | address: http://localhost:%v", webapp_port, webapp_port)
+		fmt.Printf("Server running @ port %v  | address: http://localhost:%v", webapp_port, webapp_port)
 
-	err := server.ListenAndServe()
-	if err != nil {
-		fmt.Printf("An error occured: %v\n", err)
-		log.Fatal("Server Crashed")
+		err := server.ListenAndServe()
+		if err != nil {
+			fmt.Printf("An error occured: %v\n", err)
+			log.Fatal("Server Crashed")
+		}
+		if err != nil && strings.Contains(err.Error(), "address already in use") {
+			port++
+			continue
+		} else if err != nil {
+			log.Fatal("HTTP Server failed:", err)
+		}
+		break
 	}
 
 }
