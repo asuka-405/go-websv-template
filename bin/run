@@ -1,103 +1,36 @@
-#!/bin/zsh
+#!/bin/bash
 
-# Define reusable help function
-function help() {
-  cat <<EOF
-Usage: $0 <command> [arguments]
+DIR="$ROOT/bin/tasks"
+shift
 
-Commands:
-  dev                     Build and start the test server with hot-reload using reflex
-  clean                   Remove the test server binary
-  tidy                    Run 'go mod tidy' and 'go mod vendor'
-  install <pkg>           Install a package and run 'go mod tidy' and 'go mod vendor'
-  migrate <up|down|redo|setup>  Run database migrations
-  tree                    Display the directory tree ignoring files from .gitignore
-  help                    Show this help message
-EOF
-    exit 0
-}
-
-function migration(){
-    if [ -z "$1" ]; then
-        echo "Usage: ./run migrate <up|down|redo|setup>"
+if ! command -v gum &>/dev/null; then
+        echo "gum not found. Install gum first."
         exit 1
-        elif [[ "$1" == "setup" ]]; then
-        echo "Creating migration table..."
-        migrate create -ext sql -dir $GWT_DB_MIG -seq init
-        return
-    fi
-    migrate -path $GWT_DB_MIG -database "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=disable" "$1"
-}
-
-# Define reusable function for installing a package
-function install_package() {
-    if [ -z "$1" ]; then
-        echo "Usage: ./run install <package>"
-        exit 1
-    fi
-    go get "$1"
-    go mod tidy
-    go mod vendor
-}
-
-# If no command is specified, show help
-if [ -z "$1" ]; then
-    help
 fi
 
-GWT_BIN_NAME="erp-server"
-GWT_BIN_PATH="./bin/$GWT_BIN_NAME"
-
-# Handle commands
-case "$1" in
-    help)
-        help
-    ;;
-    tree)
-        tree --gitignore -I "vendor"
-    ;;
-    build)
-        echo "Building binary..."
-        go build -o "$GWT_BIN_PATH" .
-        echo "Binary built: $GWT_BIN_PATH"
-    ;;
-    start)
-        echo "Starting server..."
-        "$GWT_BIN_PATH"
-    ;;
-    dev)
-        echo "Starting dev server with hot-reload..."
-        air
-    ;;
-    clean)
-        rm -f "$GWT_BIN_PATH"
-        echo "Binary removed: $GWT_BIN_PATH"
-    ;;
-    tidy)
-        go mod tidy
-        go mod vendor
-        printf "\e[4A\e[J" // Clear the last 4 lines, tidy and vendor gives error when they try to access pgdata
-    ;;
-    add)
-        install_package "$2"
-    ;;
-    install | i)
-        if [ -z "$2" ]; then
-            echo "Usage: $0 install <package>"
-            exit 1
-        fi
-        go install "$2"
-        echo "Installed package: $2 to $GOPATH/bin"
-        echo "  Ensure $GOPATH/bin is in your PATH"
-        echo "  By default GOPATH is ~/go"
-    ;;
-    migrate)
-        migration "$2"
-    ;;
-    *)
-        echo "Unknown command: $1"
+if [ -z "$DIR" ]; then
+        gum style --foreground red "No directory provided."
         exit 1
-    ;;
-esac
+fi
 
-exit 0
+if [ ! -d "$DIR" ]; then
+        gum style --foreground red "Directory '$DIR' doesn't exist."
+        exit 1
+fi
+
+if [ $# -eq 0 ]; then
+        gum style --foreground yellow "No tasks provided."
+        exit 1
+fi
+
+for task in "$@"; do
+        filepath="$DIR/$task"
+        if [ ! -x "$filepath" ]; then
+                gum style --foreground red "Task '$task' not found or not executable in '$DIR'."
+                continue
+        fi
+        
+        gum confirm "Execute task '$task'?" && {
+                gum spin --title "Running $task..." --show-output -- "$filepath"
+        } || gum style --foreground yellow "Skipped $task"
+done

@@ -1,26 +1,31 @@
 #!/bin/bash
+declare -A tools=(
+        [golangci]="go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest"
+        [air]="go install github.com/air-verse/air@latest"
+)
 
-yay -Syu --noconfirm git go migrate
+if ! command -v gum &>/dev/null; then
+        echo "gum not found. Install gum first."
+        exit 1
+fi
 
-function install_air() {
-    go install github.com/air-verse/air@latest
-    # air init
+install_tool() {
+        tool="$1"
+        cmd="${tools[$tool]}"
+        if [ -n "$cmd" ]; then
+                gum spin --title "Installing $tool..." --show-output -- bash -c "$cmd"
+        else
+                gum style --foreground red "Tool '$tool' not found."
+        fi
 }
 
-function install_docker_archlinux() {
-    sudo pacman -Sy docker docker-compose
-    sudo systemctl enable docker
-    sudo systemctl start docker
-    sudo usermod -aG docker $USER
-    sudo echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
-    sudo sysctl --system
-}
-
-if [ $1 == "air" ]; then
-    install_air
-    elif [ $1 == "docker" ]; then
-    install_docker_archlinux
+if [ -n "$1" ]; then
+        install_tool "$1"
 else
-    install_air
-    install_docker_archlinux
+        gum style --border normal --margin "1" --padding "1" --foreground yellow "No tool name provided"
+        gum confirm "Install ALL tools?" && {
+                for tool in "${!tools[@]}"; do
+                        install_tool "$tool"
+                done
+        } || echo "Aborted."
 fi

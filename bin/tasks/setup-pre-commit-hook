@@ -1,0 +1,7 @@
+cat > .git/hooks/pre-commit <<'EOF'
+#!/bin/sh
+gofumpt -l -w .
+golangci-lint run
+EOF
+
+chmod +x .git/hooks/pre-commit

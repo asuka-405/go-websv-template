@@ -1,3 +1,5 @@
+secret.firebase.json
 .env
-.tmp
-.data
+tmp/
+log/
+src/public/js/firebase-config.js

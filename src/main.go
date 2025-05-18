@@ -1,14 +1,7 @@
 package main
 
-import (
-	"root/src/lib/libblockchain/blockchainserver"
-	"root/src/server"
-
-	"github.com/joho/godotenv"
-)
+import "spotlight/src/server"
 
 func main() {
-	godotenv.Load()
-	go blockchainserver.BlockchainServer()
-	server.BootHTTPServer()
+	server.BootSpotlightServer()
 }

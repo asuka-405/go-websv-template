@@ -1,43 +1,25 @@
 package web
 
 import (
-	// apiV1 "root/src/api/v1"
-	"log"
-	"net/http"
-
-	"root/src/lib/libresponse"
-	"root/src/lib/libtemplate"
-	"root/src/web/routes"
+	"spotlight/src/lib/server"
+	"spotlight/src/lib/types"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
-var ViewEngine = libtemplate.NewTemplateEngine("src/web/views")
-
-func Initialize() chi.Router {
-
-	err := ViewEngine.LoadTemplates()
-	if err != nil {
-		log.Fatal(err)
+func Initialize() types.RouterMeta {
+	r := chi.NewRouter()
+	m := []types.Middleware{
+		middleware.AllowContentType(
+			"application/json",
+			"application/x-www-form-urlencoded",
+			"multipart/form-data",
+		),
 	}
-
-	head := ViewEngine.RenderWithLogs("default-head.wc", nil)
-
-	data := map[string]string{
-		"title": "Hello, World!",
-		"head":  head,
-		"body":  "Hello, World!",
-	}
-
-	rendered := ViewEngine.RenderWithLogs("index.layout.html", data)
-
-	router := chi.NewRouter()
-	router.Get("/healthz", h_readiness)
-	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		libresponse.WithHTML(w, http.StatusOK, rendered)
+	return server.InitializeRouter(types.RouterMeta{
+		MountPoint: "/web",
+		Router:     r,
+		Middleware: m,
 	})
-
-	router.Mount("/", routes.Initialize(*ViewEngine))
-
-	return router
 }

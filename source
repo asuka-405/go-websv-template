@@ -1,14 +1,38 @@
-PATH=$PATH:$HOME/go/bin
+#!/bin/bash
 
-env_file="$(pwd)/.env"
-if [[ -f "$env_file" ]]; then
-    echo "Loading environment variables from $env_file..."
-    set -a
-    source "$env_file"
-    set +a
-else
-    echo "No .env file found in $(pwd). Skipping..."
+if ! command -v gum &>/dev/null; then
+        echo "gum not found. Install gum first."
+        exit 1
 fi
 
-cur_dir="$(pwd)"
-export PATH=$PATH:$cur_dir/bin
+# Source .env if it exists, with confirmation
+if [ -f .env ]; then
+        gum confirm "Do you want to source the .env file?" && {
+                set -a
+                source .env
+                set +a
+                gum style --foreground green "Sourced .env"
+        } || gum style --foreground yellow "Skipped sourcing .env"
+else
+        gum style --foreground red ".env file not found."
+fi
+
+# Add bin to PATH with confirmation
+if [ -d ./bin ]; then
+        gum confirm "Do you want to add './bin' to PATH?" && {
+                export PATH="$PWD/bin:$PATH"
+                gum style --foreground green "Added './bin' to PATH"
+        } || gum style --foreground yellow "Skipped adding './bin' to PATH"
+fi
+
+# Add additional dirs passed as args to PATH with confirmation
+for dir in "$@"; do
+        if [ -d "$dir" ]; then
+                gum confirm "Do you want to add '$dir' to PATH?" && {
+                        export PATH="$PWD/$dir:$PATH"
+                        gum style --foreground green "Added '$dir' to PATH"
+                } || gum style --foreground yellow "Skipped adding '$dir' to PATH"
+        else
+                gum style --foreground red "Directory '$dir' not found."
+        fi
+done

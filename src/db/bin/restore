@@ -1,2 +1,0 @@
-#!/bin/bash
-pg_restore -U $DB_USER -d $DB_NAME -F c backup.sql
